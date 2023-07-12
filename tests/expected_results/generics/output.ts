@@ -5,6 +5,14 @@
 /* Do not modify it by hand - just update the pydantic models and then re-run the script
 */
 
+export interface ApiResponse {
+  data: unknown;
+  error: Error | null;
+}
+export interface Error {
+  code: number;
+  message: string;
+}
 export interface Article {
   author: User;
   content: string;
@@ -19,12 +27,12 @@ export interface Error {
   message: string;
 }
 export interface ListArticlesResponse {
-  data?: Article[];
-  error?: Error;
+  data: Article[] | null;
+  error: Error | null;
 }
 export interface ListUsersResponse {
-  data?: User[];
-  error?: Error;
+  data: User[] | null;
+  error: Error | null;
 }
 export interface UserProfile {
   name: string;
@@ -34,6 +42,6 @@ export interface UserProfile {
   age: number;
 }
 export interface UserProfileResponse {
-  data?: UserProfile;
-  error?: Error;
+  data: UserProfile | null;
+  error: Error | null;
 }
