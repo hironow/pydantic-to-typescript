@@ -137,8 +137,8 @@ def clean_schema(schema: Dict[str, Any]) -> None:
     for prop in schema.get("properties", {}).values():
         prop.pop("title", None)
 
-    if "enum" in schema and schema.get("description") == "An enumeration.":
-        del schema["description"]
+    if "prefixItems" in prop:
+        prop["items"] = prop["prefixItems"]
 
 
 def generate_json_schema(models: List[Type[BaseModel]]) -> str:
@@ -163,7 +163,7 @@ def generate_json_schema(models: List[Type[BaseModel]]) -> str:
             "_Master_", **{m.__name__: (m, ...) for m in models}
         )
         master_model.model_config["extra"] = "forbid"
-        master_model.model_config["schema_extra"] = staticmethod(clean_schema)
+        master_model.model_config["json_schema_extra"] = staticmethod(clean_schema)
 
         schema = master_model.model_json_schema()
 
@@ -175,7 +175,7 @@ def generate_json_schema(models: List[Type[BaseModel]]) -> str:
     finally:
         for m, x in zip(models, model_extras):
             if x is not None:
-                m.model_config.extra = x
+                m.model_config["extra"] = x
 
 
 def generate_typescript_defs(
