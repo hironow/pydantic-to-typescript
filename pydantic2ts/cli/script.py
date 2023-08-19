@@ -12,7 +12,7 @@ from types import ModuleType
 from typing import Any, Dict, List, Tuple, Type
 from uuid import uuid4
 
-from pydantic import BaseModel, Extra, create_model
+from pydantic import BaseModel, create_model
 
 try:
     from pydantic.generics import GenericModel
