@@ -153,20 +153,20 @@ def generate_json_schema(models: List[Type[BaseModel]]) -> str:
     '[k: string]: any' from being added to every interface. This change is reverted
     once the schema has been generated.
     """
-    model_extras = [m.model_config.get("extra", None) for m in models]
+    model_extras = [m.model_config.get("extra") for m in models]
 
     try:
         for m in models:
-            if m.model_config.get("extra", None) != "allow":
+            if m.model_config.get("extra") != "allow":
                 m.model_config["extra"] = "forbid"
 
-        master_model = create_model(
+        master_model: BaseModel = create_model(
             "_Master_", **{m.__name__: (m, ...) for m in models}
         )
         master_model.model_config["extra"] = "forbid"
         master_model.model_config["json_schema_extra"] = staticmethod(clean_schema)
 
-        schema = master_model.model_json_schema()
+        schema: dict = master_model.model_json_schema(mode="serialization")
 
         for d in schema.get("$defs", {}).values():
             clean_schema(d)
