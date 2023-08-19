@@ -61,12 +61,13 @@ def is_concrete_pydantic_model(obj) -> bool:
     Return true if an object is a concrete subclass of pydantic's BaseModel.
     'concrete' meaning that it's not a GenericModel.
     """
+    generic_metadata = getattr(obj, "__pydantic_generic_metadata__", None)
     if not inspect.isclass(obj):
         return False
     elif obj is BaseModel:
         return False
-    elif GenericModel and issubclass(obj, GenericModel):
-        return bool(obj.__concrete__)
+    elif generic_metadata:
+        return not bool(generic_metadata["parameters"])
     else:
         return issubclass(obj, BaseModel)
 
