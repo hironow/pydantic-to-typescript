@@ -137,9 +137,14 @@ def clean_schema(schema: Dict[str, Any]) -> None:
     """
     for prop in schema.get("properties", {}).values():
         prop.pop("title", None)
+        
+        # Work around to produce Tuples just like Arrays since json2ts doesn't support the
+        # prefixItems json openAPI spec
+        if "prefixItems" in prop:
+            prop["items"] = prop["prefixItems"]
 
-    if "prefixItems" in prop:
-        prop["items"] = prop["prefixItems"]
+    if "enum" in schema and schema.get("description") == "An enumeration.":
+        del schema["description"]
 
 
 def generate_json_schema(models: List[Type[BaseModel]]) -> str:
