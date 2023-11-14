@@ -64,9 +64,7 @@ def is_concrete_pydantic_model(obj) -> bool:
     if not inspect.isclass(obj):
         return False
     elif obj is BaseModel:
-        return False
-    elif GenericModel and issubclass(obj, GenericModel):
-        return bool(obj.__concrete__)
+        return getattr(obj, "__concrete__", False)
     else:
         return issubclass(obj, BaseModel)
 
@@ -156,18 +154,18 @@ def generate_json_schema(models: List[Type[BaseModel]]) -> str:
 
     try:
         for m in models:
-            if m.model_config.get("extra", None) != "allow":
-                m.model_config["extra"] = "forbid"
+            if m.model_config.get("extra", None) != Extra.allow:
+                m.model_config["extra"] = Extra.forbid
 
         master_model = create_model(
-            "_Master_", **{m.__name__: (m, ...) for m in models}
+            "_Master_", **{m.__name__: (m, ...) for m in models}, __base__=m
         )
-        master_model.model_config["extra"] = "forbid"
+        master_model.model_config["extra"] = Extra.forbid
         master_model.model_config["schema_extra"] = staticmethod(clean_schema)
 
-        schema = master_model.model_json_schema()
+        schema = json.loads(master_model.schema_json())
 
-        for d in schema.get("$defs", {}).values():
+        for d in schema.get("definitions", {}).values():
             clean_schema(d)
 
         return json.dumps(schema, indent=2)
@@ -175,7 +173,7 @@ def generate_json_schema(models: List[Type[BaseModel]]) -> str:
     finally:
         for m, x in zip(models, model_extras):
             if x is not None:
-                m.model_config.extra = x
+                m.model_config["extra"] = x
 
 
 def generate_typescript_defs(
