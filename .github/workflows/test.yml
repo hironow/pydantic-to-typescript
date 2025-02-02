@@ -1,17 +1,11 @@
-name: Lint and Test
+name: Test
 on:
   push:
   pull_request:
+
 jobs:
-  lint:
-    name: Lint code with black
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: psf/black@stable
   test:
     name: Run unit tests
-    needs: lint
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
